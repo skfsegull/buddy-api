@@ -1,0 +1,2 @@
+# buddy-api
+Félagatal bakendi
