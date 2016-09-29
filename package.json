@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js | bunyan",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "node --debug=5858 index.js --color=always"
   },
   "author": "",
   "license": "MIT",
@@ -14,9 +13,5 @@
     "boom": "^4.0.0",
     "hapi": "^15.0.3",
     "joi": "^9.0.4"
-  },
-  "devDependencies": {
-    "bunyan": "^1.8.1",
-    "nodemon": "^1.10.2"
   }
 }

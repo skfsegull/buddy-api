@@ -1,0 +1,14 @@
+Group
+	- Id: ObjectId
+	- Name: String
+	- Type: ENUM[Organization, Union, Troop, Unit, Patrol, Event]
+	- Timeframe (optional)
+		- From
+		- To
+	- Children: [groupId]
+
+User
+	- Id: ObjectId
+	- Name: String
+	- PersonalId: String
+	- Groups: [{ groupId, fromDate, toDate }]

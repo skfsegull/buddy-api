@@ -1,12 +1,10 @@
-FROM node:6.4
+FROM node:6.6
 
 ENV NPM_CONFIG_LOGLEVEL warn
 
 WORKDIR /code/
 
 COPY package.json .
-
-RUN npm install nodemon -g
 
 RUN npm install
 
