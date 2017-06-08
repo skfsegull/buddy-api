@@ -4,15 +4,14 @@ services:
   api:
     build: .
     command: npm run dev
+    depends_on:
+      - mongodb
     ports:
       - '8000:8000'
     volumes:
-      - .:/code
-      - /code/node_modules
+      - "./app:/src/app"
     links:
       - mongodb
-    environment:
-      - VIRTUAL_HOST=api.buddy.dev
 
   mongodb:
     image: mongo

@@ -1,15 +1,19 @@
-FROM node:6.6
+FROM node:8.0
 
 ENV NPM_CONFIG_LOGLEVEL warn
 
-WORKDIR /code/
+RUN mkdir /src
 
-COPY package.json .
+RUN npm install nodemon -g
 
+WORKDIR /src
+
+WORKDIR /src
+ADD app/package.json /src/package.json
 RUN npm install
 
-COPY . .
+ADD app/nodemon.json /src/nodemon.json
 
 EXPOSE 8000
 
-CMD ['npm', 'start']
+CMD ['npm', 'dev']

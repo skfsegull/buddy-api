@@ -1,15 +1,31 @@
 'use strict';
 
 const Boom = require('boom');
-const Joi = require('joi');
 const mongojs = require('mongojs');
+
+const { Joi } = require('../utils');
+
+
+const userSchema = Joi.object({
+	_id: Joi.any(),
+	name: Joi.string().max(255).required(),
+	email: Joi.string().email(),
+	personalId: Joi.string().personalId().required(),
+	address: Joi.object({
+		street: Joi.string(),
+		number: Joi.string(),
+		postal: Joi.number(),
+		city: Joi.string(),
+		country: Joi.string().min(2).max(3),
+	}).optional().meta({ className: 'Address' }),
+}).meta({ className: 'User' });
 
 exports.register = function(server, options, next) {
 	const db = server.app.db;
 
 	server.route({
 		method: 'GET',
-		path: '/users',
+		path: '/',
 		handler: function (request, reply) {
 			db.users.find(function(err, docs) {
 				if (err) {
@@ -18,12 +34,19 @@ exports.register = function(server, options, next) {
 
 				reply(docs);
 			});
-		}
+		},
+		config: {
+			description: 'Lists all users',
+			response: {
+				schema: Joi.array().items(userSchema),
+			},
+			tags: ['api', 'users'],
+		},
 	});
 
 	server.route({
 		method: 'GET',
-		path: '/users/{id}',
+		path: '/{id}',
 		handler: function (request, reply) {
 			db.users.findOne({
 				_id: mongojs.ObjectID(request.params.id)
@@ -38,12 +61,24 @@ exports.register = function(server, options, next) {
 
 				reply(doc);
 			});
-		}
+		},
+		config: {
+			description: 'Fetch a user',
+			response: {
+				schema: userSchema,
+			},
+			tags: ['api'],
+			validate: {
+				params: {
+					id: Joi.string().required(),
+				},
+			},
+		},
 	});
 
 	server.route({
 		method: 'POST',
-		path: '/users',
+		path: '/',
 		handler: function (request, reply) {
 			const user = request.payload;
 
@@ -59,18 +94,17 @@ exports.register = function(server, options, next) {
 			});
 		},
 		config: {
+			description: 'Create new users',
+			tags: ['api'],
 			validate: {
-				payload: {
-					name: Joi.string().min(10).max(50).required(),
-					email: Joi.string().min(10).max(50).required()
-				}
-			}
-		}
+				payload: userSchema,
+			},
+		},
 	});
 
 	server.route({
 		method: 'PATCH',
-		path: '/users/{id}',
+		path: '/{id}',
 		handler: function (request, reply) {
 			db.users.update({
 				_id: mongojs.ObjectId(request.params.id)
@@ -89,19 +123,32 @@ exports.register = function(server, options, next) {
 			});
 		},
 		config: {
+			description: 'Update a user',
+			tags: ['api'],
 			validate: {
+				params: {
+					id: Joi.string().required(),
+				},
 				payload: Joi.object({
-					name: Joi.string().min(10).max(50).optional(),
-					email: Joi.string().min(10).max(50).optional()
-				}).required().min(1)
-			}
-		}
+					name: Joi.string(),
+					email: Joi.string().email(),
+					address: Joi.object({
+						street: Joi.string(),
+						number: Joi.string(),
+						postal: Joi.number(),
+						city: Joi.string(),
+						country: Joi.string().min(2).max(3),
+					}),
+				}).required().min(1),
+			},
+		},
 	});
 
 	server.route({
 		method: 'DELETE',
-		path: '/users/{id}',
+		path: '/{id}',
 		handler: function (request, reply) {
+			console.log(Joi.validate(request.params.id, Joi.string()));
 			db.users.remove({
 				_id: mongojs.ObjectID(request.params.id)
 			}, function (err, result) {
@@ -115,7 +162,16 @@ exports.register = function(server, options, next) {
 
 				reply().code(204);
 			});
-		}
+		},
+		config: {
+			description: 'Deletes a user',
+			tags: ['api'],
+			validate: {
+				params: {
+					id: Joi.string().required(),
+				},
+			},
+		},
 	});
 
 	return next();
